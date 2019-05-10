@@ -1,4 +1,10 @@
 package sg.com.wego.service;
 
-public class MetaSearchService {
+
+import sg.com.wego.model.Airport;
+
+import java.util.List;
+
+public interface MetaSearchService {
+    List<Airport> getAllAirports();
 }
