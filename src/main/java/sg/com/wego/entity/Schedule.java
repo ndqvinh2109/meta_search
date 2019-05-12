@@ -1,10 +1,11 @@
-package sg.com.wego.model;
+package sg.com.wego.entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "SCHEDULE")
-public class Schedule {
+public class Schedule implements Serializable {
 
     @Id
     @Column(name="id")

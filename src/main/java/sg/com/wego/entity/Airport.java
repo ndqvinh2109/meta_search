@@ -1,20 +1,21 @@
-package sg.com.wego.model;
+package sg.com.wego.entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
-@Table(name = "PROVIDER")
-public class Provider {
+@Table(name = "AIRPORT")
+public class Airport implements Serializable {
 
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy= GenerationType.AUTO)
     private long id;
 
-    @Column(name = "provider_code")
+    @Column(name = "airport_code")
     private String code;
 
-    @Column(name = "provider_name")
+    @Column(name = "airport_name")
     private String name;
 
     public long getId() {

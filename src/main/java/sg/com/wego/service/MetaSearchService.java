@@ -1,10 +1,14 @@
 package sg.com.wego.service;
 
 
-import sg.com.wego.model.Airport;
+import sg.com.wego.dto.MetasearchDto;
 
-import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public interface MetaSearchService {
-    List<Airport> getAllAirports();
+
+    void findFlight(MetaSearchCriteria metaSearchCriteria, String generatedId) throws InterruptedException, ExecutionException;
+
+    MetasearchDto pollingFlight(String generatedId, long offset);
+
 }

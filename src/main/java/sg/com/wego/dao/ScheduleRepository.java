@@ -2,9 +2,15 @@ package sg.com.wego.dao;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import sg.com.wego.model.Schedule;
+import sg.com.wego.entity.Schedule;
+
+import java.util.List;
 
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
+
+    List<Schedule> findAllByDepartAirportCodeAndArrivalAirportCodeAndProviderCode(String departAirportCode, String arrivalCode, String providerCode);
+
+    List<Schedule> findAllByDepartAirportCodeAndArrivalAirportCode(String departCode, String arrivalCode);
 
 }

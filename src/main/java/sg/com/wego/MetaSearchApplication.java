@@ -2,10 +2,12 @@ package sg.com.wego;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 
 
 @SpringBootApplication
-public class MetaSearchApplication  {
+@EnableCaching
+public class MetaSearchApplication {
     public static void main(String[] args) {
         SpringApplication.run(MetaSearchApplication.class, args);
     }
