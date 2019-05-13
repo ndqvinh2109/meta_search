@@ -1,8 +1,6 @@
-package sg.com.wego.dto;
+package sg.com.wego.model;
 
-import java.io.Serializable;
-
-public class ScheduleDto implements Serializable {
+public class ScheduleDto {
 
     private long id;
 
