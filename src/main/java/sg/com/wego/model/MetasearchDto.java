@@ -1,4 +1,4 @@
-package sg.com.wego.dto;
+package sg.com.wego.model;
 
 import java.util.List;
 

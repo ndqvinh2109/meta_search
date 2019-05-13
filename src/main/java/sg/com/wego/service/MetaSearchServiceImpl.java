@@ -3,30 +3,28 @@ package sg.com.wego.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import sg.com.wego.cache.ScheduleCacheManager;
+import sg.com.wego.cache.entity.FareFlight;
 import sg.com.wego.dao.AirportRepository;
 import sg.com.wego.dao.ProviderRepository;
 import sg.com.wego.dao.ScheduleRepository;
-import sg.com.wego.dto.MetasearchDto;
-import sg.com.wego.dto.ScheduleDto;
 import sg.com.wego.entity.Schedule;
+import sg.com.wego.mapper.FareFlightMapper;
+import sg.com.wego.model.MetasearchDto;
+import sg.com.wego.model.ScheduleDto;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @Service
 public class MetaSearchServiceImpl implements MetaSearchService {
+
+    private static final Logger logger = LogManager.getLogger(MetaSearchServiceImpl.class);
 
     @Autowired
     private AirportRepository airportRepository;
@@ -38,69 +36,58 @@ public class MetaSearchServiceImpl implements MetaSearchService {
     private ScheduleRepository scheduleRepository;
 
     @Autowired
-    private RestTemplate restTemplate;
-
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-
-    @Autowired
     private ScheduleCacheManager scheduleCacheManager;
 
-    private ExecutorService executorService;
+    @Autowired
+    private FareFlightMapper fareFlightMapper;
 
-    private static final Logger logger = LogManager.getLogger(MetaSearchServiceImpl.class);
+    private ExecutorService executorService;
 
     @PostConstruct
     private void init() {
         executorService = Executors.newFixedThreadPool(30);
     }
 
-    @PreDestroy
-    private void destroy() {
-        executorService.shutdown();
-    }
 
     @Override
-    public void findFlight(MetaSearchCriteria metaSearchCriteria, String generatedId) throws InterruptedException, ExecutionException {
+    public void findFlight(MetaSearchCriteria metaSearchCriteria, String generatedId) {
         List<Schedule> schedules = scheduleRepository.findAllByDepartAirportCodeAndArrivalAirportCode(metaSearchCriteria.getDepartureCode(), metaSearchCriteria.getArrivalCode());
 
         for (Schedule schedule : schedules) {
-            executorService.submit(() -> callRestToGetSchedules(metaSearchCriteria, schedule.getProviderCode(), generatedId));
+            executorService.submit(() -> findSchedulesFromProviderCode(schedules, schedule.getProviderCode(), generatedId));
         }
+    }
 
+    public void findSchedulesFromProviderCode(List<Schedule> schedules, String providerCode, String generatedId) {
+        List<FareFlight> fareFlights = schedules.stream().filter(schedule -> schedule.getProviderCode().equalsIgnoreCase(providerCode)).
+                map(this::mapFareFlight).collect(Collectors.toList());
+        fareFlights.forEach(fareFlight -> scheduleCacheManager.cacheSchedule(generatedId, fareFlight));
+    }
+
+    private FareFlight mapFareFlight(Schedule schedule) {
+        return fareFlightMapper.from(schedule);
     }
 
     @Override
     public MetasearchDto pollingFlight(String generatedId, long offset) {
-        long size = scheduleCacheManager.getSize(generatedId);
-        MetasearchDto metasearchDto = new MetasearchDto();
-        metasearchDto.setOffset(size);
-        metasearchDto.setScheduleDtoList(scheduleCacheManager.getCachedSchedules(generatedId, offset, -1));
+        MetasearchDto metasearchDto = toMetasearchDto(generatedId, offset);
         return metasearchDto;
     }
 
-    private List<ScheduleDto> callRestToGetSchedules(MetaSearchCriteria metaSearchCriteria, String providerCode, String generatedId) throws InterruptedException {
-        String url = "http://localhost:8080/api/schedules";
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-                .queryParam("departureCode", metaSearchCriteria.getDepartureCode())
-                .queryParam("arrivalCode", metaSearchCriteria.getArrivalCode())
-                .queryParam("providerCode", providerCode);
-
-        logger.info("Calling rest api: " + builder.toUriString());
-
-        ResponseEntity<List<ScheduleDto>> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, null, new ParameterizedTypeReference<List<ScheduleDto>>() {
-        });
-
-        Thread.sleep(10000);
-
-        List<ScheduleDto> schedules = response.getBody();
-
-        schedules.forEach(scheduleDto -> scheduleCacheManager.cacheSchedule(generatedId, scheduleDto));
-
-        return schedules;
+    private MetasearchDto toMetasearchDto(String generatedId, long offset) {
+        long size = scheduleCacheManager.getSize(generatedId);
+        MetasearchDto metasearchDto = new MetasearchDto();
+        metasearchDto.setOffset(size);
+        List<ScheduleDto> scheduleDtos = scheduleCacheManager.getCachedSchedules(generatedId, offset, -1).stream().
+                map(fareFlight -> fareFlightMapper.to(fareFlight)).
+                collect(Collectors.toList());
+        metasearchDto.setScheduleDtoList(scheduleDtos);
+        return metasearchDto;
     }
 
+    @PreDestroy
+    private void destroy() {
+        executorService.shutdown();
+    }
 
 }
