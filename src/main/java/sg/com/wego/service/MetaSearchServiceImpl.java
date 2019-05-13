@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sg.com.wego.cache.ScheduleCacheManager;
 import sg.com.wego.cache.entity.FareFlight;
-import sg.com.wego.dao.AirportRepository;
-import sg.com.wego.dao.ProviderRepository;
 import sg.com.wego.dao.ScheduleRepository;
 import sg.com.wego.entity.Schedule;
 import sg.com.wego.mapper.FareFlightMapper;
@@ -26,11 +24,7 @@ public class MetaSearchServiceImpl implements MetaSearchService {
 
     private static final Logger logger = LogManager.getLogger(MetaSearchServiceImpl.class);
 
-    @Autowired
-    private AirportRepository airportRepository;
-
-    @Autowired
-    private ProviderRepository providerRepository;
+    public static final int ALL = -1;
 
     @Autowired
     private ScheduleRepository scheduleRepository;
@@ -58,10 +52,12 @@ public class MetaSearchServiceImpl implements MetaSearchService {
         }
     }
 
-    public void findSchedulesFromProviderCode(List<Schedule> schedules, String providerCode, String generatedId) {
+    public List<FareFlight> findSchedulesFromProviderCode(List<Schedule> schedules, String providerCode, String generatedId) {
         List<FareFlight> fareFlights = schedules.stream().filter(schedule -> schedule.getProviderCode().equalsIgnoreCase(providerCode)).
                 map(this::mapFareFlight).collect(Collectors.toList());
         fareFlights.forEach(fareFlight -> scheduleCacheManager.cacheSchedule(generatedId, fareFlight));
+
+        return fareFlights;
     }
 
     private FareFlight mapFareFlight(Schedule schedule) {
@@ -76,13 +72,15 @@ public class MetaSearchServiceImpl implements MetaSearchService {
 
     private MetasearchDto toMetasearchDto(String generatedId, long offset) {
         long size = scheduleCacheManager.getSize(generatedId);
+        List<FareFlight> fareFlights = scheduleCacheManager.getCachedSchedules(generatedId, offset, ALL);
         MetasearchDto metasearchDto = new MetasearchDto();
         metasearchDto.setOffset(size);
-        List<ScheduleDto> scheduleDtos = scheduleCacheManager.getCachedSchedules(generatedId, offset, -1).stream().
-                map(fareFlight -> fareFlightMapper.to(fareFlight)).
-                collect(Collectors.toList());
-        metasearchDto.setScheduleDtoList(scheduleDtos);
+        metasearchDto.setScheduleDtoList(fareFlights.stream().map(this::mapScheduleDto).collect(Collectors.toList()));
         return metasearchDto;
+    }
+
+    private ScheduleDto mapScheduleDto(FareFlight fareFlight) {
+        return fareFlightMapper.to(fareFlight);
     }
 
     @PreDestroy

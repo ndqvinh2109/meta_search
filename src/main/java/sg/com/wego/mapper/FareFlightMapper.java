@@ -11,7 +11,7 @@ import sg.com.wego.model.ScheduleDto;
 public class FareFlightMapper {
 
     @Autowired
-    private ModelMapper modelMapper;
+    private ModelMapper modelMapper = new ModelMapper();
 
     public ScheduleDto to (FareFlight fareFlight) {
         ScheduleDto scheduleDto = modelMapper.map(fareFlight, ScheduleDto.class);
