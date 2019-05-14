@@ -17,7 +17,7 @@ import sg.com.wego.util.Validator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static sg.com.wego.Constant.MessageBundle.*;
+import static sg.com.wego.constant.MessageBundle.*;
 import static sg.com.wego.mapper.FareFlightMapper.forMapper;
 
 @Service
@@ -49,8 +49,8 @@ public class MetaSearchServiceImpl implements MetaSearchService {
     }
 
     @Override
-    public void validate(MetaSearchCriteria metaSearchCriteria) {
-        Validator.of(metaSearchCriteria).
+    public MetaSearchCriteria validate(MetaSearchCriteria metaSearchCriteria) {
+        return Validator.of(metaSearchCriteria).
                 validate(metaSearchValidator::isDepartureAndArriValNotSame, DEPARTURE_CODE_AND_ARRIVAL_CODE_MUST_NOT_BE_THE_SAME).
                 validate(metaSearchValidator::isDepartureAndArrivalCodeSupported, UNSUPPORTED_DEPARTURE_CODE_OR_ARRIVAL_CODE).
                 validate(metaSearchValidator::isDepartureAndArrivalExistsOnSchudules, THERE_WERE_NO_FLIGHT_EXISTING).

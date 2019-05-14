@@ -12,12 +12,17 @@ import sg.com.wego.cache.ScheduleCacheManager;
 import sg.com.wego.cache.entity.FareFlight;
 import sg.com.wego.dao.ScheduleRepository;
 import sg.com.wego.entity.Schedule;
+import sg.com.wego.exception.FareFlightException;
+import sg.com.wego.matcher.MetaSearchMatcher;
 import sg.com.wego.model.MetasearchDto;
+import sg.com.wego.model.ScheduleDto;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -29,8 +34,12 @@ public class MetaSearchServiceTest {
     @Mock
     private ScheduleRepository scheduleRepository;
 
+
     @Spy
     private ModelMapper modelMapper;
+
+    @Mock
+    MetaSearchValidatorImpl metaSearchValidator;
 
     @InjectMocks
     private MetaSearchServiceImpl metaSearchService;
@@ -70,13 +79,19 @@ public class MetaSearchServiceTest {
         when(scheduleCacheManager.getSize("0a946908-cfc0-449a-b7aa-bb18ab4cea7a")).thenReturn(1L);
         when(scheduleCacheManager.getCachedSchedules("0a946908-cfc0-449a-b7aa-bb18ab4cea7a", 0, -1)).thenReturn(prepareListFareFlight());
 
-
         MetasearchDto metasearchDto = metaSearchService.pollingFlight("0a946908-cfc0-449a-b7aa-bb18ab4cea7a", 0);
+
+        ScheduleDto actual = new ScheduleDto();
+        actual.setDepartAirportCode("AAR");
+        actual.setArrivalAirportCode("ADB");
+        actual.setProviderCode("jetstart.com");
+
+        ScheduleDto expected = metasearchDto.getScheduleDtoList().get(0);
+
         assertThat(metasearchDto.getOffset(), Matchers.is(1L));
         assertThat(metasearchDto.getScheduleDtoList().size(), Matchers.is(1));
-        assertThat(metasearchDto.getScheduleDtoList().get(0).getProviderCode(), Matchers.is("jetstart.com"));
-        assertThat(metasearchDto.getScheduleDtoList().get(0).getDepartAirportCode(), Matchers.is("AAR"));
-        assertThat(metasearchDto.getScheduleDtoList().get(0).getArrivalAirportCode(), Matchers.is("ADB"));
+        assertThat(expected, MetaSearchMatcher.matchesScheduleDto(actual));
+
     }
 
     @Test
@@ -91,6 +106,38 @@ public class MetaSearchServiceTest {
         assertThat(metasearchDto.getScheduleDtoList().size(), Matchers.is(0));
     }
 
+    @Test
+    public void shouldThrowFareFlightException_When_OneOfValidationViolate() {
+        MetaSearchCriteria metaSearchCriteria = new MetaSearchCriteria();
+        metaSearchCriteria.setDepartureCode("AAR");
+        metaSearchCriteria.setArrivalCode("AAR");
+
+        when(metaSearchValidator.isDepartureAndArriValNotSame(any(MetaSearchCriteria.class))).thenReturn(false);
+        when(metaSearchValidator.isDepartureAndArrivalCodeSupported(any(MetaSearchCriteria.class))).thenReturn(true);
+        when(metaSearchValidator.isDepartureAndArrivalExistsOnSchudules(any(MetaSearchCriteria.class))).thenReturn(false);
+
+
+        assertThrows(FareFlightException.class, () -> {
+            metaSearchService.validate(metaSearchCriteria);
+        });
+    }
+
+    @Test
+    public void shouldByPassValidation_When_AllValidationValid() {
+        MetaSearchCriteria metaSearchCriteria = new MetaSearchCriteria();
+        metaSearchCriteria.setDepartureCode("AAR");
+        metaSearchCriteria.setArrivalCode("AAR");
+
+        when(metaSearchValidator.isDepartureAndArriValNotSame(any(MetaSearchCriteria.class))).thenReturn(true);
+        when(metaSearchValidator.isDepartureAndArrivalCodeSupported(any(MetaSearchCriteria.class))).thenReturn(true);
+        when(metaSearchValidator.isDepartureAndArrivalExistsOnSchudules(any(MetaSearchCriteria.class))).thenReturn(true);
+
+
+        MetaSearchCriteria expected = metaSearchService.validate(metaSearchCriteria);
+
+        assertNotNull(expected);
+
+    }
 
     private List<FareFlight> prepareListFareFlight() {
         FareFlight fareFlight = new FareFlight();

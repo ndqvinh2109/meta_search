@@ -1,4 +1,4 @@
-package sg.com.wego.Constant;
+package sg.com.wego.constant;
 
 public class MessageBundle {
 

@@ -12,10 +12,10 @@ public class Airport implements Serializable {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private long id;
 
-    @Column(name = "airport_code", unique = true)
+    @Column(name = "code", unique = true, length = 5)
     private String code;
 
-    @Column(name = "airport_name")
+    @Column(name = "name")
     private String name;
 
     public long getId() {

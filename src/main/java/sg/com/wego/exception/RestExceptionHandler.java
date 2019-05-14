@@ -30,4 +30,5 @@ public class RestExceptionHandler {
         logger.error("Exception: " + errorMessage.getDebugMessage());
         return ResponseEntity.status(errorMessage.getStatus()).body(errorMessage);
     }
+
 }

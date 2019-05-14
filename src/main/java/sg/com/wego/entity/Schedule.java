@@ -12,10 +12,10 @@ public class Schedule implements Serializable {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private long id;
 
-    @Column(name="depart_airport_code")
+    @Column(name="departure_code")
     private String departAirportCode;
 
-    @Column(name="arrival_airport_code")
+    @Column(name="arrival_code")
     private String arrivalAirportCode;
 
     @Column(name="provider_code")

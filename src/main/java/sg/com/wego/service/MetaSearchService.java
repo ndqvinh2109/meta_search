@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface MetaSearchService {
 
-    void validate(MetaSearchCriteria metaSearchCriteria);
+    MetaSearchCriteria validate(MetaSearchCriteria metaSearchCriteria);
 
     List<FareFlight> findFlight(MetaSearchCriteria metaSearchCriteria, String generatedId) throws InterruptedException;
 

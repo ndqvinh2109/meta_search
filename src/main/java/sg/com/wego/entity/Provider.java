@@ -12,10 +12,10 @@ public class Provider implements Serializable {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private long id;
 
-    @Column(name = "provider_code", unique = true)
+    @Column(name = "code", unique = true, length = 10)
     private String code;
 
-    @Column(name = "provider_name")
+    @Column(name = "name")
     private String name;
 
     public long getId() {
