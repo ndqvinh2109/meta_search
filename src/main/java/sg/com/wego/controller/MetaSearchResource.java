@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import sg.com.wego.model.MetasearchDto;
+import sg.com.wego.dto.MetasearchDto;
 import sg.com.wego.service.MetaSearchCriteria;
 import sg.com.wego.service.MetaSearchService;
 
