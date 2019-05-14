@@ -35,9 +35,8 @@ public class MetaSearchServiceTest {
     @InjectMocks
     private MetaSearchServiceImpl metaSearchService;
 
-
     @Test
-    public void shouldCacheFareFlight_IF_ProviderCodeFound_In_Schedules() throws InterruptedException {
+    public void shouldCacheFareFlight_When_ProviderCodeFound_In_Schedules() throws InterruptedException {
         MetaSearchCriteria metaSearchCriteria = new MetaSearchCriteria();
         metaSearchCriteria.setDepartureCode("AAR");
         metaSearchCriteria.setArrivalCode("ADB");
@@ -51,7 +50,7 @@ public class MetaSearchServiceTest {
      }
 
    @Test
-    public void shouldNotCacheFareFlight_IFProvider_NotFound_In_Schedules() throws InterruptedException {
+    public void shouldNotCacheFareFlight_WhenProvider_NotFound_In_Schedules() throws InterruptedException {
        MetaSearchCriteria metaSearchCriteria = new MetaSearchCriteria();
        metaSearchCriteria.setDepartureCode("AAR");
        metaSearchCriteria.setArrivalCode("ADB");
@@ -66,7 +65,7 @@ public class MetaSearchServiceTest {
 
 
     @Test
-    public void shouldTransform_MetaSearchToClient_IF_Data_Exists_In_Redis() {
+    public void shouldTransform_MetaSearchToClient_When_Data_Exists_In_Redis() {
 
         when(scheduleCacheManager.getSize("0a946908-cfc0-449a-b7aa-bb18ab4cea7a")).thenReturn(1L);
         when(scheduleCacheManager.getCachedSchedules("0a946908-cfc0-449a-b7aa-bb18ab4cea7a", 0, -1)).thenReturn(prepareListFareFlight());
@@ -81,7 +80,7 @@ public class MetaSearchServiceTest {
     }
 
     @Test
-    public void shouldResponseEmpty_ToClient_IF_Data_NotExists_In_Redis() {
+    public void shouldResponseEmpty_ToClient_When_Data_NotExists_In_Redis() {
 
         when(scheduleCacheManager.getSize("0a946908-cfc0-449a-b7aa-bb18ab4cea7a")).thenReturn(0L);
         when(scheduleCacheManager.getCachedSchedules("0a946908-cfc0-449a-b7aa-bb18ab4cea7a", 0, -1)).thenReturn(new ArrayList<>());

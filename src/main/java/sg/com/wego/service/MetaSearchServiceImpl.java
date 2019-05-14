@@ -51,9 +51,10 @@ public class MetaSearchServiceImpl implements MetaSearchService {
     @Override
     public void validate(MetaSearchCriteria metaSearchCriteria) {
         Validator.of(metaSearchCriteria).
-                validate(metaSearchCriteria1 -> metaSearchValidator.isDepartureAndArriValNotSame(metaSearchCriteria1), DEPARTURE_CODE_AND_ARRIVAL_CODE_MUST_NOT_BE_THE_SAME).
-                validate(metaSearchCriteria1 -> metaSearchValidator.isDepartureAndArrivalCodeSupported(metaSearchCriteria1), UNSUPPORTED_DEPARTURE_CODE_OR_ARRIVAL_CODE).
-                validate(metaSearchCriteria1 -> metaSearchValidator.isDepartureAndArrivalExistsOnSchudules(metaSearchCriteria1), THERE_WERE_NO_FLIGHT_EXISTING).get();
+                validate(metaSearchValidator::isDepartureAndArriValNotSame, DEPARTURE_CODE_AND_ARRIVAL_CODE_MUST_NOT_BE_THE_SAME).
+                validate(metaSearchValidator::isDepartureAndArrivalCodeSupported, UNSUPPORTED_DEPARTURE_CODE_OR_ARRIVAL_CODE).
+                validate(metaSearchValidator::isDepartureAndArrivalExistsOnSchudules, THERE_WERE_NO_FLIGHT_EXISTING).
+                get();
     }
 
     private void cachingFareFlight(List<FareFlight> fareFlights, String generatedId) {
