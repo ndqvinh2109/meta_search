@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import sg.com.wego.cache.ScheduleCacheManager;
 import sg.com.wego.cache.entity.FareFlight;
@@ -41,7 +40,6 @@ public class MetaSearchServiceImpl implements MetaSearchService {
 
 
     @Override
-    @Async("asyncExecutor")
     public List<FareFlight> findFlight(MetaSearchCriteria metaSearchCriteria, String generatedId) throws InterruptedException {
         List<FareFlight> fareFlights = findSchedulesFromProviderCode(metaSearchCriteria);
         cachingFareFlight(fareFlights, generatedId);
@@ -64,6 +62,9 @@ public class MetaSearchServiceImpl implements MetaSearchService {
     private List<FareFlight> findSchedulesFromProviderCode(MetaSearchCriteria metaSearchCriteria) throws InterruptedException {
         Thread.sleep(10000);
         List<Schedule> schedules = scheduleRepository.findAllByDepartAirportCodeAndArrivalAirportCode(metaSearchCriteria.getDepartureCode(), metaSearchCriteria.getArrivalCode());
+
+        //Map<String, List<Schedule>> scheduleMap = schedules.stream().collect(Collectors.groupingBy(Schedule::getProviderCode, Collectors.toList()));
+
         return schedules.stream().map(this::mapFareFlight).collect(Collectors.toList());
     }
 
