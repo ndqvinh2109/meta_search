@@ -2,22 +2,23 @@ package sg.com.wego.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import sg.com.wego.cache.ScheduleCacheManager;
 import sg.com.wego.cache.entity.FareFlight;
 import sg.com.wego.dao.ScheduleRepository;
 import sg.com.wego.entity.Schedule;
-import sg.com.wego.mapper.FareFlightMapper;
 import sg.com.wego.model.MetasearchDto;
 import sg.com.wego.model.ScheduleDto;
+import sg.com.wego.util.Validator;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+
+import static sg.com.wego.Constant.MessageBundle.*;
+import static sg.com.wego.mapper.FareFlightMapper.forMapper;
 
 @Service
 public class MetaSearchServiceImpl implements MetaSearchService {
@@ -33,35 +34,40 @@ public class MetaSearchServiceImpl implements MetaSearchService {
     private ScheduleCacheManager scheduleCacheManager;
 
     @Autowired
-    private FareFlightMapper fareFlightMapper;
+    private ModelMapper modelMapper;
 
-    private ExecutorService executorService;
-
-    @PostConstruct
-    private void init() {
-        executorService = Executors.newFixedThreadPool(30);
-    }
+    @Autowired
+    private MetaSearchValidator metaSearchValidator;
 
 
     @Override
-    public void findFlight(MetaSearchCriteria metaSearchCriteria, String generatedId) {
-        List<Schedule> schedules = scheduleRepository.findAllByDepartAirportCodeAndArrivalAirportCode(metaSearchCriteria.getDepartureCode(), metaSearchCriteria.getArrivalCode());
-
-        for (Schedule schedule : schedules) {
-            executorService.submit(() -> findSchedulesFromProviderCode(schedules, schedule.getProviderCode(), generatedId));
-        }
-    }
-
-    public List<FareFlight> findSchedulesFromProviderCode(List<Schedule> schedules, String providerCode, String generatedId) {
-        List<FareFlight> fareFlights = schedules.stream().filter(schedule -> schedule.getProviderCode().equalsIgnoreCase(providerCode)).
-                map(this::mapFareFlight).collect(Collectors.toList());
-        fareFlights.forEach(fareFlight -> scheduleCacheManager.cacheSchedule(generatedId, fareFlight));
-
+    @Async("asyncExecutor")
+    public List<FareFlight> findFlight(MetaSearchCriteria metaSearchCriteria, String generatedId) throws InterruptedException {
+        List<FareFlight> fareFlights = findSchedulesFromProviderCode(metaSearchCriteria);
+        cachingFareFlight(fareFlights, generatedId);
         return fareFlights;
     }
 
+    @Override
+    public void validate(MetaSearchCriteria metaSearchCriteria) {
+        Validator.of(metaSearchCriteria).
+                validate(metaSearchCriteria1 -> metaSearchValidator.isDepartureAndArriValNotSame(metaSearchCriteria1), DEPARTURE_CODE_AND_ARRIVAL_CODE_MUST_NOT_BE_THE_SAME).
+                validate(metaSearchCriteria1 -> metaSearchValidator.isDepartureAndArrivalCodeSupported(metaSearchCriteria1), UNSUPPORTED_DEPARTURE_CODE_OR_ARRIVAL_CODE).
+                validate(metaSearchCriteria1 -> metaSearchValidator.isDepartureAndArrivalExistsOnSchudules(metaSearchCriteria1), THERE_WERE_NO_FLIGHT_EXISTING).get();
+    }
+
+    private void cachingFareFlight(List<FareFlight> fareFlights, String generatedId) {
+        fareFlights.forEach(fareFlight -> scheduleCacheManager.cacheSchedule(generatedId, fareFlight));
+    }
+
+    private List<FareFlight> findSchedulesFromProviderCode(MetaSearchCriteria metaSearchCriteria) throws InterruptedException {
+        Thread.sleep(10000);
+        List<Schedule> schedules = scheduleRepository.findAllByDepartAirportCodeAndArrivalAirportCode(metaSearchCriteria.getDepartureCode(), metaSearchCriteria.getArrivalCode());
+        return schedules.stream().map(this::mapFareFlight).collect(Collectors.toList());
+    }
+
     private FareFlight mapFareFlight(Schedule schedule) {
-        return fareFlightMapper.from(schedule);
+        return forMapper(modelMapper).from(schedule);
     }
 
     @Override
@@ -80,12 +86,8 @@ public class MetaSearchServiceImpl implements MetaSearchService {
     }
 
     private ScheduleDto mapScheduleDto(FareFlight fareFlight) {
-        return fareFlightMapper.to(fareFlight);
+        return forMapper(modelMapper).to(fareFlight);
     }
 
-    @PreDestroy
-    private void destroy() {
-        executorService.shutdown();
-    }
 
 }

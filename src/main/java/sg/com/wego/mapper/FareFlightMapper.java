@@ -1,17 +1,23 @@
 package sg.com.wego.mapper;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import sg.com.wego.cache.entity.FareFlight;
 import sg.com.wego.entity.Schedule;
 import sg.com.wego.model.ScheduleDto;
 
-@Component
 public class FareFlightMapper {
 
-    @Autowired
-    private ModelMapper modelMapper = new ModelMapper();
+    private ModelMapper modelMapper;
+
+    private FareFlightMapper(){}
+
+    private FareFlightMapper(ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
+    }
+
+    public static FareFlightMapper forMapper (ModelMapper modelMapper) {
+        return new FareFlightMapper(modelMapper);
+    }
 
     public ScheduleDto to (FareFlight fareFlight) {
         ScheduleDto scheduleDto = modelMapper.map(fareFlight, ScheduleDto.class);
