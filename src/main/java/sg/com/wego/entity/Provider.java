@@ -12,7 +12,7 @@ public class Provider implements Serializable {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private long id;
 
-    @Column(name = "provider_code")
+    @Column(name = "provider_code", unique = true)
     private String code;
 
     @Column(name = "provider_name")
