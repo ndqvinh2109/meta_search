@@ -1,18 +1,16 @@
 package sg.com.wego.service;
 
 
-import sg.com.wego.cache.entity.FareFlight;
-import sg.com.wego.model.MetasearchDto;
-
-import java.util.List;
+import sg.com.wego.model.MetaSearchRequest;
+import sg.com.wego.model.MetasearchResponse;
 
 public interface MetaSearchService {
 
-    MetaSearchCriteria validate(MetaSearchCriteria metaSearchCriteria);
+    MetaSearchRequest validate(MetaSearchRequest metaSearchRequest);
 
-    List<FareFlight> findFlight(MetaSearchCriteria metaSearchCriteria, String generatedId) throws InterruptedException;
+    MetasearchResponse findFlight(MetaSearchRequest metaSearchRequest);
 
-    MetasearchDto pollingFlight(String generatedId, long offset);
+    MetasearchResponse pollingFlight(String generatedId, long offset);
 
 
 

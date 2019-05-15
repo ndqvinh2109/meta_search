@@ -1,11 +1,12 @@
-package sg.com.wego.service;
+package sg.com.wego.model;
 
-public class MetaSearchCriteria {
+import java.time.LocalDate;
 
+public class MetaSearchRequest {
 
     private String departureCode;
     private String arrivalCode;
-
+    private LocalDate localDate;
 
     public String getDepartureCode() {
         return departureCode;
@@ -21,6 +22,14 @@ public class MetaSearchCriteria {
 
     public void setArrivalCode(String arrivalCode) {
         this.arrivalCode = arrivalCode;
+    }
+
+    public LocalDate getLocalDate() {
+        return localDate;
+    }
+
+    public void setLocalDate(LocalDate localDate) {
+        this.localDate = localDate;
     }
 
 }

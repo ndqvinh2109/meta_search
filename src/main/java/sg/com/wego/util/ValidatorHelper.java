@@ -10,24 +10,24 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 
-public class Validator<T> {
+public class ValidatorHelper<T> {
 
-    private static final Logger logger = LogManager.getLogger(Validator.class);
+    private static final Logger logger = LogManager.getLogger(ValidatorHelper.class);
 
     private final T t;
     private final List<Throwable> exceptions = new ArrayList<>();
 
 
-    private Validator(T t) {
+    private ValidatorHelper(T t) {
         this.t = t;
     }
 
-    public static <T> Validator<T> of(T t) {
-        return new Validator<>(Objects.requireNonNull(t));
+    public static <T> ValidatorHelper<T> of(T t) {
+        return new ValidatorHelper<>(Objects.requireNonNull(t));
     }
 
 
-    public Validator<T> validate(Predicate<T> validation, String message) {
+    public ValidatorHelper<T> validate(Predicate<T> validation, String message) {
         if (!validation.test(t)) {
             logger.info("Exception message: " + message);
             exceptions.add(new FareFlightException(message));

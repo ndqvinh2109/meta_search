@@ -2,7 +2,7 @@ package sg.com.wego.model;
 
 import java.io.Serializable;
 
-public class ScheduleDto implements Serializable {
+public class ScheduleResponse implements Serializable {
 
     private long id;
 

@@ -3,7 +3,7 @@ package sg.com.wego.mapper;
 import org.modelmapper.ModelMapper;
 import sg.com.wego.cache.entity.FareFlight;
 import sg.com.wego.entity.Schedule;
-import sg.com.wego.model.ScheduleDto;
+import sg.com.wego.model.ScheduleResponse;
 
 public class FareFlightMapper {
 
@@ -19,14 +19,14 @@ public class FareFlightMapper {
         return new FareFlightMapper(modelMapper);
     }
 
-    public ScheduleDto to (FareFlight fareFlight) {
-        ScheduleDto scheduleDto = modelMapper.map(fareFlight, ScheduleDto.class);
-        scheduleDto.setBasePrice(fareFlight.getBasePrice() + Math.random() * 0.3 * fareFlight.getBasePrice());
-        return scheduleDto;
+    public ScheduleResponse to (FareFlight fareFlight) {
+        ScheduleResponse scheduleResponse = modelMapper.map(fareFlight, ScheduleResponse.class);
+        return scheduleResponse;
     }
 
     public FareFlight from (Schedule schedule) {
         FareFlight fareFlight = modelMapper.map(schedule, FareFlight.class);
+        fareFlight.setBasePrice(schedule.getBasePrice() + Math.random() * 0.3 * schedule.getBasePrice());
         return fareFlight;
     }
 }

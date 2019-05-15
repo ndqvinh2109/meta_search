@@ -14,11 +14,6 @@ public class ScheduleServiceImpl implements ScheduleService {
     private ScheduleRepository scheduleRepository;
 
     @Override
-    public List<Schedule> findAllSchedulesByDepartAirportCodeAndArrivalAirportCodeAndProviderCode(String departureCode, String arrivalCode, String providerCode) {
-        return scheduleRepository.findAllByDepartAirportCodeAndArrivalAirportCodeAndProviderCode(departureCode, arrivalCode, providerCode);
-    }
-
-    @Override
     public List<Schedule> findAllSchedulesByDepartAirportCodeAndArrivalAirportCode(String departCode, String arrivalCode) {
         return scheduleRepository.findAllByDepartAirportCodeAndArrivalAirportCode(departCode, arrivalCode);
     }

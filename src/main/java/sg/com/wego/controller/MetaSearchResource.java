@@ -5,11 +5,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sg.com.wego.model.MetasearchDto;
-import sg.com.wego.service.MetaSearchCriteria;
+import sg.com.wego.model.MetaSearchRequest;
+import sg.com.wego.model.MetasearchResponse;
 import sg.com.wego.service.MetaSearchService;
-
-import java.util.UUID;
 
 
 @RestController
@@ -23,16 +21,13 @@ public class MetaSearchResource {
 
 
     @PostMapping(path = "/flights", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<String> searchOneWayTicket(@RequestBody MetaSearchCriteria metaSearchCriteria) throws InterruptedException {
-        metaSearchService.validate(metaSearchCriteria);
-
-        String generatedId = UUID.randomUUID().toString();
-        metaSearchService.findFlight(metaSearchCriteria, generatedId);
-        return ResponseEntity.ok().body(generatedId);
+    public ResponseEntity<MetasearchResponse> searchOneWayTicket(@RequestBody MetaSearchRequest metaSearchRequest) throws InterruptedException {
+        metaSearchService.validate(metaSearchRequest);
+        return ResponseEntity.ok().body(metaSearchService.findFlight(metaSearchRequest));
     }
 
-    @GetMapping("/flights/{generatedId}/{offset}")
-    public ResponseEntity<MetasearchDto> polllingScheduleProvider(@PathVariable String generatedId, @PathVariable Long offset) {
+    @GetMapping("/flights/{generatedId}")
+    public ResponseEntity<MetasearchResponse> polllingScheduleProvider(@PathVariable String generatedId, @RequestParam(defaultValue = "0") Long offset) {
         return ResponseEntity.ok().body(metaSearchService.pollingFlight(generatedId, offset));
     }
 
