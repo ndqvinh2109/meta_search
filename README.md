@@ -25,7 +25,9 @@
     mvn clean install
     
 ## Run application
-     
+    
+    Make sure redis already started
+    
     Run command: 
     java -jar target java -jar target\metasearch-0.1.0-SNAPSHOT.jar  
     
