@@ -53,7 +53,7 @@
             "scheduleResponses": null
         }
     
-    2. http://localhost:8080/api/flights/5e5a5f25-180b-43c1-9c44-7a9ed60a4c42?offset=0
+    2. http://localhost:8080/api/flights/5e5a5f25-180b-43c1-9c44-7a9ed60a4c42?offset=7
     
     Request
     
