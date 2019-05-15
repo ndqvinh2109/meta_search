@@ -1,6 +1,6 @@
-#Fare Flight Search
+# Fare Flight Search
 
-##Tools used
+## Tools used
     - Spring boot 2.1.2.RELEASE
     - spring-boot-starter-test
     - spring-boot-starter-data-redis
@@ -35,8 +35,9 @@
     
 ## Sample request and response
     
-    ### http://localhost:8080/api/flights   
-    - Request: 
+    1. http://localhost:8080/api/flights   
+    
+    Request
         Body as JSON: 
         {
             "departureCode": "AAR",
@@ -44,21 +45,21 @@
             "localDate": "2019-09-09"
         }
         
-    - Response:     
+    Response     
         {
             "generatedId": "5e5a5f25-180b-43c1-9c44-7a9ed60a4c42",
             "offset": 0,
             "scheduleResponses": null
         }
     
-    ### http://localhost:8080/api/flights/5e5a5f25-180b-43c1-9c44-7a9ed60a4c42?offset=0
+    2. http://localhost:8080/api/flights/5e5a5f25-180b-43c1-9c44-7a9ed60a4c42?offset=0
     
-    - Request:
+    Request
     
         Path param: 5e5a5f25-180b-43c1-9c44-7a9ed60a4c42
         Query param: 0
         
-    - Response:
+    Response
         {
             "generatedId": "5e5a5f25-180b-43c1-9c44-7a9ed60a4c42",
             "offset": 7,
