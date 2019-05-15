@@ -38,7 +38,8 @@
     1. http://localhost:8080/api/flights   
     
     Request
-        Body as JSON: 
+    
+    Body as JSON: 
         {
             "departureCode": "AAR",
             "arrivalCode": "ADB",
