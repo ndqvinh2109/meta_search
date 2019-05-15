@@ -35,7 +35,7 @@
     
 ## Sample request and response
     
-    1. http://localhost:8080/api/flights   
+    1. POST http://localhost:8080/api/flights   
     
     Request
     
@@ -53,7 +53,7 @@
             "scheduleResponses": null
         }
     
-    2. http://localhost:8080/api/flights/5e5a5f25-180b-43c1-9c44-7a9ed60a4c42?offset=7
+    2. GET http://localhost:8080/api/flights/5e5a5f25-180b-43c1-9c44-7a9ed60a4c42?offset=7
     
     Request
     
