@@ -21,7 +21,7 @@ public class MetaSearchResource {
 
 
     @PostMapping(path = "/flights", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<MetasearchResponse> searchOneWayTicket(@RequestBody MetaSearchRequest metaSearchRequest) throws InterruptedException {
+    public ResponseEntity<MetasearchResponse> searchFareFlght(@RequestBody MetaSearchRequest metaSearchRequest) {
         metaSearchService.validate(metaSearchRequest);
         return ResponseEntity.ok().body(metaSearchService.findFlight(metaSearchRequest));
     }
