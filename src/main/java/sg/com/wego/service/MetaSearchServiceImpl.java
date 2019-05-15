@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sg.com.wego.cache.ScheduleCacheManager;
+import sg.com.wego.cache.FareFlightCacheManager;
 import sg.com.wego.cache.entity.FareFlight;
 import sg.com.wego.dao.ScheduleRepository;
 import sg.com.wego.entity.Schedule;
@@ -37,7 +37,7 @@ public class MetaSearchServiceImpl implements MetaSearchService {
     private ScheduleRepository scheduleRepository;
 
     @Autowired
-    private ScheduleCacheManager scheduleCacheManager;
+    private FareFlightCacheManager scheduleCacheManager;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -48,7 +48,7 @@ public class MetaSearchServiceImpl implements MetaSearchService {
     private ExecutorService executorService;
 
     @PostConstruct
-    public void init() {
+    public void initExecutor() {
         executorService = Executors.newFixedThreadPool(30);
     }
 
@@ -66,7 +66,7 @@ public class MetaSearchServiceImpl implements MetaSearchService {
     }
 
     @Override
-    public MetaSearchRequest validate(MetaSearchRequest metaSearchRequest) {
+    public MetaSearchRequest validateMetaSearchRequest(MetaSearchRequest metaSearchRequest) {
         return ValidatorHelper.of(metaSearchRequest).
                 validate(metaSearchValidator::isDepartureAndArriValNotSame, DEPARTURE_CODE_AND_ARRIVAL_CODE_MUST_NOT_BE_THE_SAME).
                 validate(metaSearchValidator::isDepartureAndArrivalCodeSupported, UNSUPPORTED_DEPARTURE_CODE_OR_ARRIVAL_CODE).
@@ -83,7 +83,7 @@ public class MetaSearchServiceImpl implements MetaSearchService {
     public List<FareFlight> cachingFareFlight(List<Schedule> schedules, String generatedId) throws InterruptedException {
         Thread.sleep(10000);
         List<FareFlight> fareFlights = schedules.stream().map(this::mapFareFlight).collect(Collectors.toList());
-        fareFlights.forEach(fareFlight -> scheduleCacheManager.cacheSchedule(generatedId, fareFlight));
+        fareFlights.forEach(fareFlight -> scheduleCacheManager.cacheFareFlight(generatedId, fareFlight));
         return fareFlights;
     }
 
@@ -92,14 +92,14 @@ public class MetaSearchServiceImpl implements MetaSearchService {
             try {
                 cachingFareFlight(scheduleList, generatedId);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error("An error occured when caching fare flight " + e);
             }
         }));
     }
 
     private MetasearchResponse toMetasearchResponse(String generatedId, long offset) {
-        long size = scheduleCacheManager.getSize(generatedId);
-        List<FareFlight> fareFlights = scheduleCacheManager.getCachedSchedules(generatedId, offset, ALL);
+        long size = scheduleCacheManager.getSizeOfFareFlights(generatedId);
+        List<FareFlight> fareFlights = scheduleCacheManager.findFareFlightByGenerateId(generatedId, offset, ALL);
         MetasearchResponse metasearchResponse = new MetasearchResponse();
         metasearchResponse.setOffset(size);
         metasearchResponse.setGeneratedId(generatedId);
@@ -116,7 +116,7 @@ public class MetaSearchServiceImpl implements MetaSearchService {
     }
 
     @PreDestroy
-    public void destroy() {
+    public void shutdownExecutor() {
         executorService.shutdown();
     }
 

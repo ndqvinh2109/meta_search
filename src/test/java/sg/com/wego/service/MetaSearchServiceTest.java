@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.modelmapper.ModelMapper;
-import sg.com.wego.cache.ScheduleCacheManager;
+import sg.com.wego.cache.FareFlightCacheManager;
 import sg.com.wego.cache.entity.FareFlight;
 import sg.com.wego.entity.Schedule;
 import sg.com.wego.exception.FareFlightException;
@@ -31,7 +31,7 @@ import static org.mockito.Mockito.*;
 public class MetaSearchServiceTest {
 
     @Mock
-    private ScheduleCacheManager scheduleCacheManager;
+    private FareFlightCacheManager scheduleCacheManager;
 
     @Spy
     private ModelMapper modelMapper;
@@ -48,20 +48,20 @@ public class MetaSearchServiceTest {
     @Test
     public void shouldCacheFareFlight_When_ProviderCodeFound_In_Schedules() throws InterruptedException {
         metaSearchService.cachingFareFlight(prepareListSchedules(), "0a946908-cfc0-449a-b7aa-bb18ab4cea7a");
-        verify(scheduleCacheManager, times(3)).cacheSchedule(anyString(), any(FareFlight.class));
+        verify(scheduleCacheManager, times(3)).cacheFareFlight(anyString(), any(FareFlight.class));
     }
 
    @Test
     public void shouldNotCacheFareFlight_WhenProvider_NotFound_In_Schedules() throws InterruptedException {
         metaSearchService.cachingFareFlight(new ArrayList<>(), "0a946908-cfc0-449a-b7aa-bb18ab4cea7a");
-       verify(scheduleCacheManager, times(0)).cacheSchedule(anyString(), any(FareFlight.class));
+       verify(scheduleCacheManager, times(0)).cacheFareFlight(anyString(), any(FareFlight.class));
     }
 
     @Test
     public void shouldTransform_MetaSearchToClient_When_Data_Exists_In_Redis() {
 
-        when(scheduleCacheManager.getSize("0a946908-cfc0-449a-b7aa-bb18ab4cea7a")).thenReturn(1L);
-        when(scheduleCacheManager.getCachedSchedules("0a946908-cfc0-449a-b7aa-bb18ab4cea7a", 0, -1)).thenReturn(prepareListFareFlight());
+        when(scheduleCacheManager.getSizeOfFareFlights("0a946908-cfc0-449a-b7aa-bb18ab4cea7a")).thenReturn(1L);
+        when(scheduleCacheManager.findFareFlightByGenerateId("0a946908-cfc0-449a-b7aa-bb18ab4cea7a", 0, -1)).thenReturn(prepareListFareFlight());
 
         MetasearchResponse metasearchResponse = metaSearchService.pollingFlight("0a946908-cfc0-449a-b7aa-bb18ab4cea7a", 0);
 
@@ -81,8 +81,8 @@ public class MetaSearchServiceTest {
     @Test
     public void shouldResponseEmpty_ToClient_When_Data_NotExists_In_Redis() {
 
-        when(scheduleCacheManager.getSize("0a946908-cfc0-449a-b7aa-bb18ab4cea7a")).thenReturn(0L);
-        when(scheduleCacheManager.getCachedSchedules("0a946908-cfc0-449a-b7aa-bb18ab4cea7a", 0, -1)).thenReturn(new ArrayList<>());
+        when(scheduleCacheManager.getSizeOfFareFlights("0a946908-cfc0-449a-b7aa-bb18ab4cea7a")).thenReturn(0L);
+        when(scheduleCacheManager.findFareFlightByGenerateId("0a946908-cfc0-449a-b7aa-bb18ab4cea7a", 0, -1)).thenReturn(new ArrayList<>());
 
         MetasearchResponse metasearchDto = metaSearchService.pollingFlight("0a946908-cfc0-449a-b7aa-bb18ab4cea7a", 0);
         assertThat(metasearchDto.getOffset(), Matchers.is(0L));
@@ -99,7 +99,7 @@ public class MetaSearchServiceTest {
         when(metaSearchValidator.isDepartureAndArrivalCodeSupported(any(MetaSearchRequest.class))).thenReturn(true);
         when(metaSearchValidator.isDepartureAndArrivalExistsOnSchudules(any(MetaSearchRequest.class))).thenReturn(false);
 
-        assertThrows(FareFlightException.class, () -> metaSearchService.validate(metaSearchCriteria));
+        assertThrows(FareFlightException.class, () -> metaSearchService.validateMetaSearchRequest(metaSearchCriteria));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class MetaSearchServiceTest {
         when(metaSearchValidator.isDepartureAndArrivalCodeSupported(any(MetaSearchRequest.class))).thenReturn(true);
         when(metaSearchValidator.isDepartureAndArrivalExistsOnSchudules(any(MetaSearchRequest.class))).thenReturn(true);
 
-        MetaSearchRequest expected = metaSearchService.validate(metaSearchCriteria);
+        MetaSearchRequest expected = metaSearchService.validateMetaSearchRequest(metaSearchCriteria);
 
         assertNotNull(expected);
 

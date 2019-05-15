@@ -6,7 +6,7 @@ import sg.com.wego.model.MetasearchResponse;
 
 public interface MetaSearchService {
 
-    MetaSearchRequest validate(MetaSearchRequest metaSearchRequest);
+    MetaSearchRequest validateMetaSearchRequest(MetaSearchRequest metaSearchRequest);
 
     MetasearchResponse findFlight(MetaSearchRequest metaSearchRequest);
 
