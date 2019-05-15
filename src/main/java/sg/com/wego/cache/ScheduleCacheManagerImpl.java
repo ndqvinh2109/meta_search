@@ -1,13 +1,13 @@
 package sg.com.wego.cache;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
 import sg.com.wego.cache.entity.FareFlight;
 import sg.com.wego.util.RedisUtil;
 
 import java.util.List;
 
-@Configuration
+@Service
 public class ScheduleCacheManagerImpl implements ScheduleCacheManager {
 
 
