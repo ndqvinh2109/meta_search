@@ -7,7 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import sg.com.wego.util.ErrorMessage;
+
+import static sg.com.wego.util.ErrorMessageBundle.byStatus;
 
 @ControllerAdvice
 public class RestExceptionHandler {
@@ -17,18 +18,13 @@ public class RestExceptionHandler {
     @ExceptionHandler({HttpMessageNotReadableException.class})
     public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
         String error = "Malformed JSON request";
-        return buildResponseEntity(new ErrorMessage(HttpStatus.BAD_REQUEST, error, ex));
+        return byStatus(HttpStatus.BAD_REQUEST).withError(error).whichException(ex).buildMessage().thenResponseEntity();
     }
 
     @ExceptionHandler({FareFlightException.class})
     public ResponseEntity<Object> handleMetaSearchParamNotValid(FareFlightException ex) {
         String error = "Param is not valid";
-        return buildResponseEntity(new ErrorMessage(HttpStatus.BAD_REQUEST, error, ex));
-    }
-
-    public ResponseEntity<Object> buildResponseEntity(ErrorMessage errorMessage) {
-        logger.error("Exception: " + errorMessage.getDebugMessage());
-        return ResponseEntity.status(errorMessage.getStatus()).body(errorMessage);
+        return byStatus(HttpStatus.BAD_REQUEST).withError(error).whichException(ex).buildMessage().thenResponseEntity();
     }
 
 }

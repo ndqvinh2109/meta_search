@@ -6,7 +6,7 @@ public class MetaSearchRequest {
 
     private String departureCode;
     private String arrivalCode;
-    private LocalDate localDate;
+    private LocalDate departureDate;
 
     public String getDepartureCode() {
         return departureCode;
@@ -24,12 +24,12 @@ public class MetaSearchRequest {
         this.arrivalCode = arrivalCode;
     }
 
-    public LocalDate getLocalDate() {
-        return localDate;
+    public LocalDate getDepartureDate() {
+        return departureDate;
     }
 
-    public void setLocalDate(LocalDate localDate) {
-        this.localDate = localDate;
+    public void setDepartureDate(LocalDate departureDate) {
+        this.departureDate = departureDate;
     }
 
 }
