@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sg.com.wego.model.MetaSearchRequest;
 import sg.com.wego.model.MetasearchResponse;
-import sg.com.wego.service.MetaSearchService;
+import sg.com.wego.service.FareFlightSearchService;
 
 
 @RestController
@@ -17,18 +17,18 @@ public class MetaSearchResource {
     private static final Logger logger = LogManager.getLogger(MetaSearchResource.class);
 
     @Autowired
-    private MetaSearchService metaSearchService;
+    private FareFlightSearchService fareFlightSearchService;
 
 
     @PostMapping(path = "/flights", consumes = "application/json", produces = "application/json")
     public ResponseEntity<MetasearchResponse> searchFareFlght(@RequestBody MetaSearchRequest metaSearchRequest) {
-        metaSearchService.validateMetaSearchRequest(metaSearchRequest);
-        return ResponseEntity.ok().body(metaSearchService.findFlight(metaSearchRequest));
+        fareFlightSearchService.validateMetaSearchRequest(metaSearchRequest);
+        return ResponseEntity.ok().body(fareFlightSearchService.findFlight(metaSearchRequest));
     }
 
     @GetMapping("/flights/{generatedId}")
     public ResponseEntity<MetasearchResponse> polllingScheduleProvider(@PathVariable String generatedId, @RequestParam(defaultValue = "0") Long offset) {
-        return ResponseEntity.ok().body(metaSearchService.pollingFlight(generatedId, offset));
+        return ResponseEntity.ok().body(fareFlightSearchService.pollingFlight(generatedId, offset));
     }
 
 }

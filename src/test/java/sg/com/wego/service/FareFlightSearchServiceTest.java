@@ -10,12 +10,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.modelmapper.ModelMapper;
 import sg.com.wego.cache.FareFlightCacheManager;
 import sg.com.wego.cache.entity.FareFlight;
-import sg.com.wego.entity.Schedule;
 import sg.com.wego.exception.FareFlightException;
 import sg.com.wego.matcher.MetaSearchMatcher;
 import sg.com.wego.model.MetaSearchRequest;
 import sg.com.wego.model.MetasearchResponse;
 import sg.com.wego.model.ScheduleResponse;
+import sg.com.wego.validator.FareFlightSearchValidatorImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,10 +25,11 @@ import java.util.concurrent.Executors;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MetaSearchServiceTest {
+public class FareFlightSearchServiceTest {
 
     @Mock
     private FareFlightCacheManager scheduleCacheManager;
@@ -40,22 +41,10 @@ public class MetaSearchServiceTest {
     private ExecutorService executorService = Executors.newFixedThreadPool(3);
 
     @Mock
-    MetaSearchValidatorImpl metaSearchValidator;
+    FareFlightSearchValidatorImpl fareFlightSearchValidator;
 
     @InjectMocks
-    private MetaSearchServiceImpl metaSearchService;
-
-    @Test
-    public void shouldCacheFareFlight_When_ProviderCodeFound_In_Schedules() throws InterruptedException {
-        metaSearchService.cachingFareFlight(prepareListSchedules(), "0a946908-cfc0-449a-b7aa-bb18ab4cea7a");
-        verify(scheduleCacheManager, times(3)).cacheFareFlight(anyString(), any(FareFlight.class));
-    }
-
-   @Test
-    public void shouldNotCacheFareFlight_WhenProvider_NotFound_In_Schedules() throws InterruptedException {
-        metaSearchService.cachingFareFlight(new ArrayList<>(), "0a946908-cfc0-449a-b7aa-bb18ab4cea7a");
-       verify(scheduleCacheManager, times(0)).cacheFareFlight(anyString(), any(FareFlight.class));
-    }
+    private FareFlightSearchServiceImpl metaSearchService;
 
     @Test
     public void shouldTransform_MetaSearchToClient_When_Data_Exists_In_Redis() {
@@ -95,9 +84,9 @@ public class MetaSearchServiceTest {
         metaSearchCriteria.setDepartureCode("AAR");
         metaSearchCriteria.setArrivalCode("AAR");
 
-        when(metaSearchValidator.isDepartureAndArriValNotSame(any(MetaSearchRequest.class))).thenReturn(false);
-        when(metaSearchValidator.isDepartureAndArrivalCodeSupported(any(MetaSearchRequest.class))).thenReturn(true);
-        when(metaSearchValidator.isDepartureAndArrivalExistsOnSchudules(any(MetaSearchRequest.class))).thenReturn(false);
+        when(fareFlightSearchValidator.isDepartureAndArriValNotSame(any(MetaSearchRequest.class))).thenReturn(false);
+        when(fareFlightSearchValidator.isDepartureAndArrivalCodeSupported(any(MetaSearchRequest.class))).thenReturn(true);
+        when(fareFlightSearchValidator.isDepartureAndArrivalExistsOnSchudules(any(MetaSearchRequest.class))).thenReturn(false);
 
         assertThrows(FareFlightException.class, () -> metaSearchService.validateMetaSearchRequest(metaSearchCriteria));
     }
@@ -108,9 +97,9 @@ public class MetaSearchServiceTest {
         metaSearchCriteria.setDepartureCode("AAR");
         metaSearchCriteria.setArrivalCode("AAR");
 
-        when(metaSearchValidator.isDepartureAndArriValNotSame(any(MetaSearchRequest.class))).thenReturn(true);
-        when(metaSearchValidator.isDepartureAndArrivalCodeSupported(any(MetaSearchRequest.class))).thenReturn(true);
-        when(metaSearchValidator.isDepartureAndArrivalExistsOnSchudules(any(MetaSearchRequest.class))).thenReturn(true);
+        when(fareFlightSearchValidator.isDepartureAndArriValNotSame(any(MetaSearchRequest.class))).thenReturn(true);
+        when(fareFlightSearchValidator.isDepartureAndArrivalCodeSupported(any(MetaSearchRequest.class))).thenReturn(true);
+        when(fareFlightSearchValidator.isDepartureAndArrivalExistsOnSchudules(any(MetaSearchRequest.class))).thenReturn(true);
 
         MetaSearchRequest expected = metaSearchService.validateMetaSearchRequest(metaSearchCriteria);
 
@@ -131,32 +120,5 @@ public class MetaSearchServiceTest {
         return fareFlights;
     }
 
-    private List<Schedule> prepareListSchedules() {
-        List<Schedule> schedules = new ArrayList<>();
-        Schedule schedule = new Schedule();
-        schedule.setDepartAirportCode("AAR");
-        schedule.setArrivalAirportCode("ADB");
-        schedule.setProviderCode("jetstart.com");
-        schedule.setBasePrice(553);
 
-        schedules.add(schedule);
-
-        schedule = new Schedule();
-        schedule.setDepartAirportCode("AAR");
-        schedule.setArrivalAirportCode("ADB");
-        schedule.setProviderCode("vnairline.com");
-        schedule.setBasePrice(415);
-
-        schedules.add(schedule);
-
-        schedule = new Schedule();
-        schedule.setDepartAirportCode("AAR");
-        schedule.setArrivalAirportCode("ADB");
-        schedule.setProviderCode("vietjetair.com");
-        schedule.setBasePrice(312);
-
-        schedules.add(schedule);
-
-        return schedules;
-    }
 }

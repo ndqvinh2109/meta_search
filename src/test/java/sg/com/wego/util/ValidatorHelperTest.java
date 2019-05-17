@@ -10,7 +10,8 @@ import sg.com.wego.dao.AirportRepository;
 import sg.com.wego.dao.ScheduleRepository;
 import sg.com.wego.exception.FareFlightException;
 import sg.com.wego.model.MetaSearchRequest;
-import sg.com.wego.service.MetaSearchValidatorImpl;
+import sg.com.wego.validator.FareFlightSearchValidatorImpl;
+import sg.com.wego.validator.ValidatorHelper;
 
 import java.util.ArrayList;
 
@@ -28,7 +29,7 @@ public class ValidatorHelperTest {
     private ScheduleRepository scheduleRepository;
 
     @InjectMocks
-    MetaSearchValidatorImpl metaSearchValidator;
+    FareFlightSearchValidatorImpl fareFlightSearchValidator;
 
     @Test
     public void shouldThrowException_WhenDepartCodeAndArrivalCode_IsTheSame() {
@@ -37,7 +38,7 @@ public class ValidatorHelperTest {
         metaSearchCriteria.setDepartureCode("AAR");
         metaSearchCriteria.setArrivalCode("AAR");
 
-        assertThrows(FareFlightException.class, () -> ValidatorHelper.of(metaSearchCriteria).validate(metaSearchValidator::isDepartureAndArriValNotSame, "Exception_1").get());
+        assertThrows(FareFlightException.class, () -> ValidatorHelper.of(metaSearchCriteria).validate(fareFlightSearchValidator::isDepartureAndArriValNotSame, "Exception_1").get());
     }
 
     @Test
@@ -49,7 +50,7 @@ public class ValidatorHelperTest {
 
         when(scheduleRepository.findAllByDepartAirportCodeAndArrivalAirportCode(anyString(), anyString())).thenReturn(new ArrayList<>());
 
-        assertThrows(FareFlightException.class, () -> ValidatorHelper.of(metaSearchCriteria).validate(metaSearchValidator::isDepartureAndArrivalExistsOnSchudules, "Exception_1").get());
+        assertThrows(FareFlightException.class, () -> ValidatorHelper.of(metaSearchCriteria).validate(fareFlightSearchValidator::isDepartureAndArrivalExistsOnSchudules, "Exception_1").get());
     }
 
     @Test
@@ -61,7 +62,7 @@ public class ValidatorHelperTest {
 
         when(airportRepository.findAllByCode(anyString())).thenReturn(new ArrayList<>());
 
-        assertThrows(FareFlightException.class, () -> ValidatorHelper.of(metaSearchCriteria).validate(metaSearchValidator::isDepartureAndArrivalCodeSupported, "Exception_1").get());
+        assertThrows(FareFlightException.class, () -> ValidatorHelper.of(metaSearchCriteria).validate(fareFlightSearchValidator::isDepartureAndArrivalCodeSupported, "Exception_1").get());
     }
 
 }

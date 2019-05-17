@@ -1,4 +1,4 @@
-package sg.com.wego.util;
+package sg.com.wego.validator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

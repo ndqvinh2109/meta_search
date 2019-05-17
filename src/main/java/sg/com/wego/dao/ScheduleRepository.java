@@ -8,9 +8,5 @@ import java.util.List;
 
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
-
-    List<Schedule> findAllByDepartAirportCodeAndArrivalAirportCodeAndProviderCode(String departAirportCode, String arrivalCode, String providerCode);
-
     List<Schedule> findAllByDepartAirportCodeAndArrivalAirportCode(String departCode, String arrivalCode);
-
 }

@@ -4,7 +4,7 @@ package sg.com.wego.service;
 import sg.com.wego.model.MetaSearchRequest;
 import sg.com.wego.model.MetasearchResponse;
 
-public interface MetaSearchService {
+public interface FareFlightSearchService {
 
     MetaSearchRequest validateMetaSearchRequest(MetaSearchRequest metaSearchRequest);
 

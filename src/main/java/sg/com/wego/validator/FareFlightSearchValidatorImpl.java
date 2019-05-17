@@ -1,4 +1,4 @@
-package sg.com.wego.service;
+package sg.com.wego.validator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,9 +11,9 @@ import sg.com.wego.model.MetaSearchRequest;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 @Service
-public class MetaSearchValidatorImpl implements MetaSearchValidator<MetaSearchRequest>{
+public class FareFlightSearchValidatorImpl implements FareFlightSearchValidator<MetaSearchRequest> {
 
-    private static final Logger logger = LogManager.getLogger(MetaSearchValidatorImpl.class);
+    private static final Logger logger = LogManager.getLogger(FareFlightSearchValidatorImpl.class);
 
     @Autowired
     private AirportRepository airportRepository;
