@@ -1,4 +1,4 @@
-package sg.com.wego.service;
+package sg.com.wego.service.searchable;
 
 import java.util.HashMap;
 import java.util.Map;
